@@ -1,4 +1,6 @@
 import click
+import hashlib
+import hmac
 import json
 import requests
 import time
@@ -43,15 +45,23 @@ def _process_bots(config):
 
 def notify(event, bot, channels):
     for channel_id in bot['channels']:
-        print(channels)
         channel = channels[channel_id]
         url = channel['hook_url']
-        payload = {
-            'text': channel['text'].format(**event),
-            'nickname': bot['nickname'],
-            'image_url': bot['image_url']
+        data = {
+            'title': event['title'],
+            'url': event['url'],
+            'start_time': event['startDate']['time'][:5],
+            'start_date': event['startDate']['date'],
+            'start_tz': event['startDate']['tz'],
+            'room': event['room'] if event['room'] else 'no room'
         }
-        requests.post(url, data={'payload', json.dumps(payload)})
+
+        payload = {
+            'text': channel['text'].format(**data),
+            'username': bot['nickname'],
+            'icon_url': bot['image_url']
+        }
+        requests.post(url, data={b'payload': json.dumps(payload).encode('utf-8')})
 
 
 def read_config(config_file):
@@ -69,7 +79,7 @@ def read_config(config_file):
     }
 
 
-def check_upcoming(config):
+def check_upcoming(config, verbose):
     global notified
 
     now = datetime.now(utc)
@@ -77,19 +87,36 @@ def check_upcoming(config):
     bots, channels = config['bots'], config['channels']
     for bot in bots.values():
         url = urljoin(config['server_url'], 'export/categ/{}.json'.format('-'.join(bot['categories'])))
-        qstring = urlencode({
+        params = {
             'from': 'now',
             'to': '+30m',
             'limit': 100
-        })
-        req = requests.get('{}?{}'.format(url, qstring))
+        }
+        if config['api_key']:
+            params['api_key'] = config['api_key']
+            if config['secret']:
+                params['timestamp'] = str(int(time.time()))
+                items = sorted(params.items(), key=lambda x: x[0].lower())
+                param_url = '{}?{}'.format(url, urlencode(items)).encode('utf-8')
+                params['signature'] = hmac.new(config['secret'].encode('utf-8'), param_url, hashlib.sha1).hexdigest()
+
+        qstring = urlencode(params)
+        url = '{}?{}'.format(url, qstring)
+        if verbose:
+            print('[d] URL: {}'.format(url))
+        req = requests.get(url)
         results = req.json()['results']
+
+        if verbose:
+            print('[i] {} events found'.format(len(results)))
 
         for event in results:
             evt_id = event['id']
             start_dt = _dt(event['startDate'])
-            if start_dt > (now - timedelta(hours=15)) and evt_id not in notified:
+            if now > (start_dt - timedelta(minutes=15)) and start_dt > now and evt_id not in notified:
                 notify(event, bot, channels)
+                if verbose:
+                    print('[>] Notified {} about {}'.format(bot['channels'], event['id']))
                 notified.add(evt_id)
 
 
@@ -100,10 +127,13 @@ def cli():
 
 @cli.command()
 @click.argument('config_file', type=click.Path(exists=True))
-def run(config_file):
+@click.option('--verbose', default=False, is_flag=True)
+def run(config_file, verbose):
     config = read_config(config_file)
     while True:
-        check_upcoming(config)
+        if verbose:
+            print('[i] Checking upcoming events')
+        check_upcoming(config, verbose)
         time.sleep(60)
 
 
