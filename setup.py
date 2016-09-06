@@ -8,6 +8,7 @@ setup(
     install_requires=[
         'click',
         'pytz',
-        'requests'
+        'requests',
+        'configparser'
     ]
 )
