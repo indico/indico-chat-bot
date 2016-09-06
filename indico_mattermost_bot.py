@@ -5,10 +5,11 @@ import json
 import re
 import requests
 import time
-from configparser import ConfigParser
+from backports.configparser import ConfigParser
 from datetime import datetime, timedelta
 from pytz import timezone, utc
-from urllib.parse import urlencode, urljoin
+from urllib import urlencode
+from urlparse import urljoin
 
 
 notified = set()
