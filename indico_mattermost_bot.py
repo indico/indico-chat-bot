@@ -4,6 +4,7 @@ import hmac
 import json
 import re
 import requests
+import sys
 import time
 from backports.configparser import ConfigParser
 from datetime import datetime, timedelta
@@ -13,6 +14,11 @@ from urlparse import urljoin
 
 
 notified = set()
+
+
+def _info(message):
+    print(message)
+    sys.stdout.flush()
 
 
 def _parse_time_delta(time_delta):
@@ -68,6 +74,10 @@ def _process_bots(config):
     return bots, channel_hooks
 
 
+def _is_fetching_past_events(bot):
+    return bot['timedelta'].startswith('-')
+
+
 def notify(event, bot, channels):
     for channel_id in bot['channels']:
         channel = channels[channel_id]
@@ -104,10 +114,6 @@ def read_config(config_file):
     }
 
 
-def _is_fetching_past_events(bot):
-    return bot['timedelta'].startswith('-')
-
-
 def check_upcoming(config, verbose):
     global notified
 
@@ -139,12 +145,12 @@ def check_upcoming(config, verbose):
         qstring = urlencode(params)
         url = '{}?{}'.format(urljoin(config['server_url'], url_path), qstring)
         if verbose:
-            print('[d] URL: {}'.format(url))
+            _info('[d] URL: {}'.format(url))
         req = requests.get(url)
         results = req.json()['results']
 
         if verbose:
-            print('[i] {} events found'.format(len(results)))
+            _info('[i] {} events found'.format(len(results)))
 
         for event in results:
             evt_id = event['id']
@@ -152,7 +158,7 @@ def check_upcoming(config, verbose):
             if (_is_fetching_past_events(bot) or start_dt > now) and evt_id not in notified:
                 notify(event, bot, channels)
                 if verbose:
-                    print('[>] Notified {} about {}'.format(bot['channels'], event['id']))
+                    _info('[>] Notified {} about {}'.format(bot['channels'], event['id']))
                 notified.add(evt_id)
 
 
@@ -168,7 +174,7 @@ def run(config_file, verbose):
     config = read_config(config_file)
     while True:
         if verbose:
-            print('[i] Checking upcoming events')
+            _info('[i] Checking upcoming events')
         check_upcoming(config, verbose)
         time.sleep(60)
 
