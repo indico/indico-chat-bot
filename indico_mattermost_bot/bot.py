@@ -3,6 +3,7 @@ import hashlib
 import hmac
 import json
 import re
+import os
 import sys
 import time
 from datetime import datetime, timedelta
@@ -143,6 +144,10 @@ def run(config_file, verbose, debug):
     storage = Storage.get_instance(config)
 
     atexit.register(lambda: _save_storage(storage))
+
+    env_debug = os.environ.get('DEBUG')
+    if env_debug:
+        debug = env_debug == '1'
 
     while True:
         if verbose:
