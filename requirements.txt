@@ -1,4 +1,4 @@
 pytz
 click
 requests
-
+configparser
