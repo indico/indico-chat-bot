@@ -153,7 +153,7 @@ def run(config_file, verbose, debug):
         if verbose:
             _info('[i] Checking upcoming events')
         check_upcoming(config, storage, verbose, debug)
-        time.sleep(60)
+        time.sleep(config['polling_time'])
 
 
 if __name__ == '__main__':
