@@ -34,7 +34,7 @@ def read_config(config_file):
     bots, channels = _process_bots(config)
 
     return {
-        'storage_path': config.get('storage', 'path', fallback='./storage.txt'),
+        'storage_path': config.get('bot', 'storage_path', fallback='./storage.txt'),
         'server_url': config['indico']['server_url'],
         'api_key': config.get('indico', 'api_key', fallback=None),
         'secret': config.get('indico', 'secret', fallback=None),
