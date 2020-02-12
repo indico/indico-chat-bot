@@ -1,0 +1,20 @@
+version: "2"
+services:
+  chat-bot:
+    build: .
+    environment:
+      - DEBUG=1
+    volumes:
+      - './docker/config:/bot/config'
+      - 'data:/data'
+    networks:
+      - backend
+  redis:
+    image: redis
+    networks:
+      - backend
+    command: redis-server --appendonly yes
+networks:
+  backend: {}
+volumes:
+  data: {}

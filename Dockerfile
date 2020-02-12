@@ -4,10 +4,9 @@ ENV DEBUG=
 
 RUN mkdir /bot/
 RUN python -m venv /bot/.venv
-RUN cd /bot && \
-    git clone https://github.com/pferreir/indico-mattermost src
+COPY . /bot/src
 RUN cd /bot/src && \
-    /bot/.venv/bin/python setup.py install
+    /bot/.venv/bin/pip install .[redis]
 
 VOLUME ["/bot/config"]
-ENTRYPOINT [ "/bot/.venv/bin/indico-mm-bot", "run", "/bot/config/bot.conf" ]
+ENTRYPOINT [ "/bot/.venv/bin/indico_chat_bot", "run", "/bot/config/bot.conf" ]
