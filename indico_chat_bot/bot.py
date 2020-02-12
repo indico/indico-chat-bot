@@ -13,8 +13,10 @@ import requests
 from pytz import timezone, utc
 from urllib.parse import urlencode, urljoin
 
+from . import notifiers
 from .util import read_config
 from .storage import Storage
+
 
 
 def _info(message):
@@ -55,7 +57,6 @@ def _is_fetching_past_events(bot):
 def notify(event, bot, channels):
     for channel_id in bot['channels']:
         channel = channels[channel_id]
-        url = channel['hook_url']
         data = {
             'title': event['title'],
             'url': event['url'],
@@ -64,13 +65,12 @@ def notify(event, bot, channels):
             'start_tz': event['startDate']['tz'],
             'room': event['room'] if event['room'] else 'no room'
         }
+        text = channel['text'].format(**data)
 
-        payload = {
-            'text': channel['text'].format(**data),
-            'username': bot['nickname'],
-            'icon_url': bot['image_url']
-        }
-        requests.post(url, data={b'payload': json.dumps(payload).encode('utf-8')})
+        channel_type = channel.get('type')
+        if channel_type not in notifiers.ALL_NOTIFIERS:
+            raise SystemError(f"Unkown notifier '{channel_type}'")
+        getattr(notifiers, channel_type).notify(bot, channel, text)
 
 
 def check_upcoming(config, storage, verbose, debug):
@@ -117,11 +117,11 @@ def check_upcoming(config, storage, verbose, debug):
         for event in results:
             evt_id = event['id']
             start_dt = _dt(event['startDate'])
-            if (_is_fetching_past_events(bot) or start_dt > now) and bot_id not in storage[evt_id]:
+            if (_is_fetching_past_events(bot) or start_dt > now) and not storage.has(evt_id, bot_id):
                 notify(event, bot, channels)
                 if verbose:
                     _info('[>] Notified {} about {}'.format(bot['channels'], event['id']))
-                storage[evt_id].add(bot_id)
+                storage.add(evt_id, bot_id)
 
 
 @click.group()
@@ -130,7 +130,7 @@ def cli():
 
 
 def _save_storage(storage):
-    print(f"Saving storage at {storage.path}... ")
+    print(f"Saving storage... ")
     storage.save()
     print("Done!")
 
@@ -141,7 +141,7 @@ def _save_storage(storage):
 @click.option('--debug', default=False, is_flag=True)
 def run(config_file, verbose, debug):
     config = read_config(config_file)
-    storage = Storage.get_instance(config)
+    storage = Storage.get_instance(config['storage_path'])
 
     atexit.register(lambda: _save_storage(storage))
 
