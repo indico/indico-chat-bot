@@ -1,7 +1,6 @@
 import atexit
 import hashlib
 import hmac
-import json
 import re
 import os
 import sys
@@ -16,7 +15,7 @@ from urllib.parse import urlencode, urljoin
 from . import notifiers
 from .util import read_config
 from .storage import Storage
-
+from.exceptions import InvalidTimeDeltaFormat, InvalidTime, UnknownNotifier
 
 
 def _info(message):
@@ -38,10 +37,10 @@ def _parse_time_delta(time_delta):
 
         atoms = list(0 if a is None else int(a) * mod for a in m.groups()[1:])
         if atoms[1] > 23 or atoms[2] > 59:
-            raise Exception("Invalid time!")
+            raise InvalidTime()
         return timedelta(days=atoms[0], hours=atoms[1], minutes=atoms[2])
     else:
-        raise Exception("Wrong format for timedelta: %s" % time_delta)
+        raise InvalidTimeDeltaFormat(time_delta)
 
 
 def _dt(dt_dict):
@@ -69,7 +68,7 @@ def notify(event, bot, channels):
 
         channel_type = channel.get('type')
         if channel_type not in notifiers.ALL_NOTIFIERS:
-            raise SystemError(f"Unkown notifier '{channel_type}'")
+            raise UnknownNotifier(channel_type)
         getattr(notifiers, channel_type).notify(bot, channel, text)
 
 
@@ -79,6 +78,7 @@ def check_upcoming(config, storage, verbose, debug):
     bots, channels = config['bots'], config['channels']
     for bot_id, bot in bots.items():
         url_path = 'export/categ/{}.json'.format('-'.join(bot['categories']))
+        time_delta = _parse_time_delta(bot['timedelta'])
         params = {
             'from': 'now',
             'to': bot['timedelta'],
@@ -90,7 +90,6 @@ def check_upcoming(config, storage, verbose, debug):
             params['nc'] = 'yes'
 
         if _is_fetching_past_events(bot):
-            time_delta = _parse_time_delta(bot['timedelta'])
             from_date = now + time_delta
             params['from'] = (from_date - timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M")
             params['to'] = from_date.strftime("%Y-%m-%dT%H:%M")
@@ -117,7 +116,12 @@ def check_upcoming(config, storage, verbose, debug):
         for event in results:
             evt_id = event['id']
             start_dt = _dt(event['startDate'])
-            if (_is_fetching_past_events(bot) or start_dt > now) and not storage.has(evt_id, bot_id):
+
+            event_time_delta_minutes = (start_dt - now).total_seconds() / 60
+            bot_time_delta_minutes = time_delta.total_seconds() / 60
+            time_delta_satisfied = 0 < event_time_delta_minutes <= bot_time_delta_minutes
+
+            if (_is_fetching_past_events(bot) or time_delta_satisfied) and not storage.has(evt_id, bot_id):
                 notify(event, bot, channels)
                 if verbose:
                     _info('[>] Notified {} about {}'.format(bot['channels'], event['id']))
