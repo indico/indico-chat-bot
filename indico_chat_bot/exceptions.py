@@ -1,6 +1,6 @@
 class InvalidTimeDeltaFormat(Exception):
     def __init__(self, time_delta):
-        message = f'Wrong format for timedelta: {time_delta}'
+        message = f"Wrong format for timedelta: {time_delta}"
         super().__init__(message)
 
 
