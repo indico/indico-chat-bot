@@ -179,7 +179,7 @@ def run(config_file, verbose, debug):
     config = read_config(config_file)
     storage = Storage.get_instance(config["storage_path"])
 
-    env_debug = os.environ.get("DEBUG")
+    env_debug = os.environ.get("INDICO_BOT_DEBUG")
     if env_debug:
         debug = env_debug == "1"
 
@@ -195,7 +195,7 @@ def run(config_file, verbose, debug):
         sys.stderr,
         format=LOGGER_FORMAT,
         filter="indico_chat_bot",
-        colorize=True,
+        colorize=os.environ.get("INDICO_BOT_COLORIZE_LOG", "1") == "1",
         level=log_level
     )
 
