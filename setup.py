@@ -10,10 +10,12 @@ setup(
         'click',
         'pytz',
         'requests',
-        'configparser'
+        'configparser',
+        'loguru'
     ],
     extras_require={
-        'redis': ['redis']
+        'redis': ['redis'],
+        'test': ['pytest', 'pytest-cov', 'pytest-freezegun']
     },
     entry_points={
         'console_scripts': [
