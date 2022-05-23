@@ -1,5 +1,5 @@
-from . import gitter, mattermost
+from . import debug, gitter, mattermost
 
-ALL_NOTIFIERS = {"mattermost", "gitter"}
+ALL_NOTIFIERS = {"mattermost", "gitter", "debug"}
 
-__all__ = ("gitter", "mattermost", "ALL_NOTIFIERS")
+__all__ = ("gitter", "mattermost", "debug", "ALL_NOTIFIERS")

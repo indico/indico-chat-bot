@@ -1,4 +1,6 @@
 from backports.configparser import ConfigParser
+from datetime import datetime
+from pytz import timezone
 
 
 def _split(text):
@@ -27,7 +29,7 @@ def _process_bots(config):
     return bots, channel_hooks
 
 
-def read_config(config_file):
+def read_config(config_file: str):
     config = ConfigParser()
     config.read(config_file)
 
@@ -42,3 +44,11 @@ def read_config(config_file):
         "channels": channels,
         "polling_time": int(config.get("bot", "polling_time", fallback="300")),
     }
+
+
+def dt(dt_dict: dict):
+    dt = datetime.combine(
+        datetime.strptime(dt_dict["date"], "%Y-%m-%d"),
+        datetime.strptime(dt_dict["time"], "%H:%M:%S").time(),
+    )
+    return timezone(dt_dict["tz"]).localize(dt)

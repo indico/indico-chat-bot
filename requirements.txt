@@ -2,3 +2,7 @@ pytz
 click
 requests
 configparser
+pytest
+pytest-cov
+pytest-freezegun
+loguru

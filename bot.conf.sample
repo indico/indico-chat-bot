@@ -2,14 +2,14 @@
 polling_time = 300
 
 [storage]
-path = file:///storage/storage.txt
+path = file://./storage.txt
 
 [indico]
 server_url = https://indico.example.com
 api_key = xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 secret = xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
-[channel_announcements]
+[channel_test]
 type = mattermost
 hook_url = https://mattermost.example.com/hooks/xxxxxxxxxxxxxxxx
 text = Event [{title}]({url}) starting at {start_time} ({room})
@@ -17,6 +17,6 @@ text = Event [{title}]({url}) starting at {start_time} ({room})
 [bot_indico]
 nickname = Indico Bot
 image_url = https://avatars.githubusercontent.com/u/715236?s=200
-channels = announcements
-categories = 1234,5678,91011
-time_delta = 30m
+channels = test
+categories = 2
+timedelta = 12h
