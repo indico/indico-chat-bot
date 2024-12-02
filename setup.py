@@ -1,5 +1,8 @@
 from setuptools import setup, find_packages
 
+
+TEST_DEPS = ['pytest', 'pytest-cov', 'pytest-freezegun']
+
 setup(
     name='indico-chat-bot',
     version='0.2',
@@ -15,7 +18,8 @@ setup(
     ],
     extras_require={
         'redis': ['redis'],
-        'test': ['pytest', 'pytest-cov', 'pytest-freezegun']
+        'test': TEST_DEPS,
+        'dev': TEST_DEPS + ['ruff']
     },
     entry_points={
         'console_scripts': [
