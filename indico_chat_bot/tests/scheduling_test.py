@@ -52,6 +52,7 @@ CATEGORIES = {
             "title": "Event 3",
             "url": "https://events/3",
             "room": "Room 1",
+            "label": None,
         },
         {
             "id": 4,
@@ -63,7 +64,22 @@ CATEGORIES = {
             "title": "Event 4",
             "url": "https://events/4",
             "room": "Room 1",
+            "label": None,
         },
+        {
+            "id": 5,
+            "startDate": {
+                "date": "2022-06-07",
+                "time": "17:30:00",
+                "tz": "Europe/Zurich",
+            },
+            "title": "Event 5",
+            "url": "https://events/5",
+            "room": "Room 1",
+            "label": {
+                "is_event_not_happening": True
+            },
+        }
     ),
 }
 
@@ -87,7 +103,7 @@ class DummyStorage(Storage):
         self.data[key].add(value)
 
 
-def dummy_fetcher(categ_list, now, time_delta, config, debug=False) -> dict:
+def dummy_fetcher(categ_list, now, time_delta, config, debug=False) -> list:
     res = []
     for categ_id in categ_list:
         for event in CATEGORIES[categ_id]:

@@ -139,6 +139,10 @@ def check_upcoming(
         logger.info("{} events found".format(len(results)))
 
         for event in results:
+            # skip over cancelled/postponed events
+            if event.get("label") and event["label"]["is_event_not_happening"]:
+                continue
+
             evt_id = event["id"]
             start_dt = dt(event["startDate"])
 
