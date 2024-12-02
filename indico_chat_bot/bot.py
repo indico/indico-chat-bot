@@ -140,7 +140,7 @@ def check_upcoming(
 
         for event in results:
             # skip over cancelled/postponed events
-            if event.get("label") and event["label"]["is_event_not_happening"]:
+            if event["label"] and event["label"]["is_event_not_happening"]:
                 continue
 
             evt_id = event["id"]
@@ -200,7 +200,7 @@ def run(config_file, verbose, debug):
         format=LOGGER_FORMAT,
         filter="indico_chat_bot",
         colorize=os.environ.get("INDICO_BOT_COLORIZE_LOG", "1") == "1",
-        level=log_level
+        level=log_level,
     )
 
     atexit.register(lambda: _save_storage(storage))

@@ -76,10 +76,8 @@ CATEGORIES = {
             "title": "Event 5",
             "url": "https://events/5",
             "room": "Room 1",
-            "label": {
-                "is_event_not_happening": True
-            },
-        }
+            "label": {"is_event_not_happening": True},
+        },
     ),
 }
 

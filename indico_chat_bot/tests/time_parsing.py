@@ -6,15 +6,15 @@ from datetime import timedelta
 class TimeParsingTests(unittest.TestCase):
     def test_time_delta_parsing(self):
         examples = {
-            'minutes': '30m',
-            'hours': '2h',
-            'days': '7d',
+            "minutes": "30m",
+            "hours": "2h",
+            "days": "7d",
         }
 
         expected = {
-            'minutes': timedelta(minutes=30),
-            'hours': timedelta(hours=2),
-            'days': timedelta(days=7),
+            "minutes": timedelta(minutes=30),
+            "hours": timedelta(hours=2),
+            "days": timedelta(days=7),
         }
 
         for time_unit, delta in examples.items():
@@ -23,5 +23,5 @@ class TimeParsingTests(unittest.TestCase):
             self.assertEqual(parsed_delta, expected_result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
