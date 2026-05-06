@@ -8,78 +8,78 @@ from indico_chat_bot.storage import Storage
 from indico_chat_bot.util import dt
 
 
-ZURICH_TZ = timezone("Europe/Zurich")
+ZURICH_TZ = timezone('Europe/Zurich')
 CONFIG = {
-    "bots": {
-        "bot_1": {"timedelta": "1h", "categories": "1", "channels": (1,)},
-        "bot_2": {"timedelta": "1d", "categories": "2", "channels": (1,)},
+    'bots': {
+        'bot_1': {'timedelta': '1h', 'categories': '1', 'channels': (1,)},
+        'bot_2': {'timedelta': '1d', 'categories': '2', 'channels': (1,)},
     },
-    "channels": {1: {"text": "Whatever"}},
+    'channels': {1: {'text': 'Whatever'}},
 }
 
 CATEGORIES = {
-    "1": (
+    '1': (
         {
-            "id": 1,
-            "startDate": {
-                "date": "2022-06-07",
-                "time": "10:00:00",
-                "tz": "Europe/Zurich",
+            'id': 1,
+            'startDate': {
+                'date': '2022-06-07',
+                'time': '10:00:00',
+                'tz': 'Europe/Zurich',
             },
-            "title": "Event 1",
-            "url": "https://events/1",
-            "room": "Room 1",
-            "label": None,
+            'title': 'Event 1',
+            'url': 'https://events/1',
+            'room': 'Room 1',
+            'label': None,
         },
         {
-            "id": 2,
-            "startDate": {
-                "date": "2022-06-07",
-                "time": "10:30:00",
-                "tz": "Europe/Zurich",
+            'id': 2,
+            'startDate': {
+                'date': '2022-06-07',
+                'time': '10:30:00',
+                'tz': 'Europe/Zurich',
             },
-            "title": "Event 2",
-            "url": "https://events/2",
-            "room": "Room 1",
-            "label": None,
+            'title': 'Event 2',
+            'url': 'https://events/2',
+            'room': 'Room 1',
+            'label': None,
         },
     ),
-    "2": (
+    '2': (
         {
-            "id": 3,
-            "startDate": {
-                "date": "2022-06-08",
-                "time": "17:00:00",
-                "tz": "Europe/Zurich",
+            'id': 3,
+            'startDate': {
+                'date': '2022-06-08',
+                'time': '17:00:00',
+                'tz': 'Europe/Zurich',
             },
-            "title": "Event 3",
-            "url": "https://events/3",
-            "room": "Room 1",
-            "label": None,
+            'title': 'Event 3',
+            'url': 'https://events/3',
+            'room': 'Room 1',
+            'label': None,
         },
         {
-            "id": 4,
-            "startDate": {
-                "date": "2022-06-08",
-                "time": "17:30:00",
-                "tz": "Europe/Zurich",
+            'id': 4,
+            'startDate': {
+                'date': '2022-06-08',
+                'time': '17:30:00',
+                'tz': 'Europe/Zurich',
             },
-            "title": "Event 4",
-            "url": "https://events/4",
-            "room": "Room 1",
-            "label": None,
+            'title': 'Event 4',
+            'url': 'https://events/4',
+            'room': 'Room 1',
+            'label': None,
         },
         {
-            "id": 5,
-            "startDate": {
-                "date": "2022-06-07",
-                "time": "17:30:00",
-                "tz": "Europe/Zurich",
+            'id': 5,
+            'startDate': {
+                'date': '2022-06-07',
+                'time': '17:30:00',
+                'tz': 'Europe/Zurich',
             },
-            "title": "Event 5",
-            "url": "https://events/5",
-            "room": "Room 1",
-            "label": {"is_event_not_happening": True},
+            'title': 'Event 5',
+            'url': 'https://events/5',
+            'room': 'Room 1',
+            'label': {'is_event_not_happening': True},
         },
     ),
 }
@@ -108,7 +108,7 @@ def dummy_fetcher(categ_list, now, time_delta, config, debug=False) -> list:
     res = []
     for categ_id in categ_list:
         for event in CATEGORIES[categ_id]:
-            event_start_dt = dt(event["startDate"])
+            event_start_dt = dt(event['startDate'])
             if (now < event_start_dt and event_start_dt <= (now + time_delta)) or (
                 now > event_start_dt and event_start_dt >= (now + time_delta)
             ):
@@ -116,7 +116,7 @@ def dummy_fetcher(categ_list, now, time_delta, config, debug=False) -> list:
     return res
 
 
-@freeze_time("2022-06-07 06:59")
+@freeze_time('2022-06-07 06:59')
 def test_no_upcoming():
     upcoming = list(
         r[0]
@@ -127,10 +127,10 @@ def test_no_upcoming():
             dummy_fetcher,
         )
     )
-    assert not {e["id"] for e in upcoming}
+    assert not {e['id'] for e in upcoming}
 
 
-@freeze_time("2022-06-07 07:00")
+@freeze_time('2022-06-07 07:00')
 def test_one_upcoming():
     upcoming = list(
         r[0]
@@ -141,10 +141,10 @@ def test_one_upcoming():
             dummy_fetcher,
         )
     )
-    assert {e["id"] for e in upcoming} == {1}
+    assert {e['id'] for e in upcoming} == {1}
 
 
-@freeze_time("2022-06-07 07:30")
+@freeze_time('2022-06-07 07:30')
 def test_two_upcoming():
     upcoming = list(
         r[0]
@@ -155,10 +155,10 @@ def test_two_upcoming():
             dummy_fetcher,
         )
     )
-    assert {e["id"] for e in upcoming} == {1, 2}
+    assert {e['id'] for e in upcoming} == {1, 2}
 
 
-@freeze_time("2022-06-07 15:00")
+@freeze_time('2022-06-07 15:00')
 def test_one_upcoming_day():
     upcoming = list(
         r[0]
@@ -169,10 +169,10 @@ def test_one_upcoming_day():
             dummy_fetcher,
         )
     )
-    assert {e["id"] for e in upcoming} == {3}
+    assert {e['id'] for e in upcoming} == {3}
 
 
-@freeze_time("2022-06-07 15:30")
+@freeze_time('2022-06-07 15:30')
 def test_two_upcoming_day():
     upcoming = list(
         r[0]
@@ -183,4 +183,4 @@ def test_two_upcoming_day():
             dummy_fetcher,
         )
     )
-    assert {e["id"] for e in upcoming} == {3, 4}
+    assert {e['id'] for e in upcoming} == {3, 4}
