@@ -92,6 +92,7 @@ ignore = [
     'PERF203', # noisy, false positives, and not applicable for 3.11+
     'FURB113', # less readable
     'FURB140', # less readable and actually slower in 3.12+
+    'COM812',  # formatter conflict
 ]
 
 extend-safe-fixes = [

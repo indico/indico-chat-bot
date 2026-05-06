@@ -9,9 +9,7 @@ def _split(text):
 
 
 def _process_bots(config):
-    channel_ids = [
-        section for section in config.sections() if section.startswith('channel_')
-    ]
+    channel_ids = [section for section in config.sections() if section.startswith('channel_')]
     bot_ids = [section for section in config.sections() if section.startswith('bot_')]
     channel_hooks = {cid[8:]: dict(config[cid]) for cid in channel_ids}
     bots = {}

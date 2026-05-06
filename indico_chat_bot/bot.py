@@ -111,7 +111,9 @@ def fetch_indico_categories(
             items = sorted(params.items(), key=lambda x: x[0].lower())
             param_url = f'/{url_path}?{urlencode(items)}'.encode()
             params['signature'] = hmac.new(
-                config['secret'].encode('utf-8'), param_url, hashlib.sha1,
+                config['secret'].encode('utf-8'),
+                param_url,
+                hashlib.sha1,
             ).hexdigest()
 
     qstring = urlencode(params)
@@ -147,9 +149,7 @@ def check_upcoming(
             event_time_delta_minutes = (start_dt - now).total_seconds() / 60
             bot_time_delta_minutes = time_delta.total_seconds() / 60
 
-            time_delta_satisfied = (
-                0 < event_time_delta_minutes <= bot_time_delta_minutes
-            )
+            time_delta_satisfied = 0 < event_time_delta_minutes <= bot_time_delta_minutes
             in_storage = storage.has(evt_id, bot_id)
 
             logger.debug(
