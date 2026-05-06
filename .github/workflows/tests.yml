@@ -12,6 +12,26 @@ permissions:
   contents: read
 
 jobs:
+  ruff:
+    name: Run ruff
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+      - uses: astral-sh/setup-uv@v7
+
+      - name: Install package
+        run: uv sync --locked --extra dev
+
+      - name: Check for linter errors
+        run: uv run ruff check --output-format github .
+
+      - name: Check for formatter errors
+        if: success() || failure()
+        run: uv run ruff format --check --output-format github .
+
+
   tests:
     name: Run tests
     runs-on: ubuntu-latest
