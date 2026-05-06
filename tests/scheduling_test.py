@@ -103,7 +103,7 @@ class DummyStorage(Storage):
         self.data[key].add(value)
 
 
-def dummy_fetcher(categ_list, now, time_delta, config, debug=False) -> list:
+def dummy_fetcher(categ_list, now, time_delta, config, insecure=False) -> list:
     res = []
     for categ_id in categ_list:
         for event in CATEGORIES[categ_id]:

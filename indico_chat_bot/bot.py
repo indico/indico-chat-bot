@@ -1,6 +1,4 @@
 import atexit
-import hashlib
-import hmac
 import os
 import re
 import sys
@@ -89,13 +87,10 @@ def fetch_indico_categories(
     now: datetime,
     time_delta: timedelta,
     config: dict,
-    debug: bool = False,
+    insecure: bool = False,
 ) -> dict:
     url_path = 'export/categ/{}.json'.format('-'.join(categ_list))
-    params = {'from': 'now', 'to': _time_delta_to_string(time_delta), 'limit': '100'}
-
-    if debug:
-        params['nc'] = 'yes'
+    params = {'from': 'now', 'to': _time_delta_to_string(time_delta), 'limit': '100', 'nc': 'yes'}
 
     # time delta is negative (send alarm after event, not before)
     if time_delta < timedelta():
@@ -104,29 +99,20 @@ def fetch_indico_categories(
         params['to'] = from_date.strftime('%Y-%m-%dT%H:%M')
         params['tz'] = 'UTC'
 
-    if config['api_key']:
-        params['apikey'] = config['api_key']
-        if config['secret']:
-            params['timestamp'] = str(int(time.time()))
-            items = sorted(params.items(), key=lambda x: x[0].lower())
-            param_url = f'/{url_path}?{urlencode(items)}'.encode()
-            params['signature'] = hmac.new(
-                config['secret'].encode('utf-8'),
-                param_url,
-                hashlib.sha1,
-            ).hexdigest()
+    headers = {}
+    if config['api_token']:
+        headers['Authorization'] = f'Bearer {config["api_token"]}'
 
-    qstring = urlencode(params)
-    url = '{}?{}'.format(urljoin(config['server_url'], url_path), qstring)
-    logger.debug(f'URL: {url}')
-    req = requests.get(url, verify=(not debug))
+    url = urljoin(config['server_url'], url_path)
+    logger.debug(f'URL: {url}?{urlencode(params)}')
+    req = requests.get(url, params=params, headers=headers, verify=(not insecure))
     return req.json()['results']
 
 
 def check_upcoming(
     config: dict,
     storage: Storage,
-    debug: bool,
+    insecure: bool,
     fetcher=fetch_indico_categories,
 ):
     bots, channels = config['bots'], config['channels']
@@ -134,7 +120,7 @@ def check_upcoming(
 
     for bot_id, bot in bots.items():
         time_delta = _parse_time_delta(bot['timedelta'])
-        results = fetcher(bot['categories'], now, time_delta, config, debug=debug)
+        results = fetcher(bot['categories'], now, time_delta, config, insecure=insecure)
 
         logger.info(f'{len(results)} events found')
 
@@ -177,7 +163,8 @@ def _save_storage(storage):
 @click.argument('config_file', type=click.Path(exists=True))
 @click.option('--verbose', default=False, is_flag=True)
 @click.option('--debug', default=False, is_flag=True)
-def run(config_file, verbose, debug):
+@click.option('--insecure', default=False, is_flag=True)
+def run(config_file, verbose, debug, insecure):
     config = read_config(config_file)
     storage = Storage.get_instance(config['storage_path'])
 
@@ -207,7 +194,7 @@ def run(config_file, verbose, debug):
 
     while True:
         logger.info('Checking upcoming events')
-        for event, bot, channels in check_upcoming(config, storage, debug):
+        for event, bot, channels in check_upcoming(config, storage, insecure):
             notify(event, bot, channels)
             logger.info('Notified {} about {}'.format(bot['channels'], event['id']))
         logger.info(
