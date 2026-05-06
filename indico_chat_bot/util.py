@@ -1,4 +1,4 @@
-from backports.configparser import ConfigParser
+from configparser import ConfigParser
 from datetime import datetime
 from pytz import timezone
 

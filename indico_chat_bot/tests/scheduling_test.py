@@ -1,5 +1,6 @@
-import pytest
 from collections import defaultdict
+
+from freezegun import freeze_time
 from pytz import timezone
 
 from ..bot import check_upcoming
@@ -28,6 +29,7 @@ CATEGORIES = {
             "title": "Event 1",
             "url": "https://events/1",
             "room": "Room 1",
+            "label": None,
         },
         {
             "id": 2,
@@ -39,6 +41,7 @@ CATEGORIES = {
             "title": "Event 2",
             "url": "https://events/2",
             "room": "Room 1",
+            "label": None,
         },
     ),
     "2": (
@@ -113,7 +116,7 @@ def dummy_fetcher(categ_list, now, time_delta, config, debug=False) -> list:
     return res
 
 
-@pytest.mark.freeze_time("2022-06-07 06:59")
+@freeze_time("2022-06-07 06:59")
 def test_no_upcoming():
     upcoming = list(
         r[0]
@@ -127,7 +130,7 @@ def test_no_upcoming():
     assert not {e["id"] for e in upcoming}
 
 
-@pytest.mark.freeze_time("2022-06-07 07:00")
+@freeze_time("2022-06-07 07:00")
 def test_one_upcoming():
     upcoming = list(
         r[0]
@@ -141,7 +144,7 @@ def test_one_upcoming():
     assert {e["id"] for e in upcoming} == {1}
 
 
-@pytest.mark.freeze_time("2022-06-07 07:30")
+@freeze_time("2022-06-07 07:30")
 def test_two_upcoming():
     upcoming = list(
         r[0]
@@ -155,7 +158,7 @@ def test_two_upcoming():
     assert {e["id"] for e in upcoming} == {1, 2}
 
 
-@pytest.mark.freeze_time("2022-06-07 15:00")
+@freeze_time("2022-06-07 15:00")
 def test_one_upcoming_day():
     upcoming = list(
         r[0]
@@ -169,7 +172,7 @@ def test_one_upcoming_day():
     assert {e["id"] for e in upcoming} == {3}
 
 
-@pytest.mark.freeze_time("2022-06-07 15:30")
+@freeze_time("2022-06-07 15:30")
 def test_two_upcoming_day():
     upcoming = list(
         r[0]
