@@ -1,5 +1,4 @@
 import os
-
 from collections import defaultdict
 from urllib.parse import urlparse
 
@@ -13,7 +12,7 @@ except ImportError:
     pass
 
 
-class Storage(object):
+class Storage:
     _instance = None
 
     @classmethod
@@ -41,8 +40,8 @@ class TextStorage(Storage):
             print(f"Storage file {self.path} didn't exist. Creating it...")
             self.save()
             print('Done')
-        with open(self.path, 'r') as f:
-            for line in f.readlines():
+        with open(self.path) as f:
+            for line in f:
                 if not line.strip():
                     continue
                 bot_id, event_id = line.strip().split(' ')
@@ -51,8 +50,7 @@ class TextStorage(Storage):
     def save(self):
         with open(self.path, 'w') as f:
             for event_id, bot_ids in self.data.items():
-                for bot_id in bot_ids:
-                    f.write(f'{bot_id} {event_id}\n')
+                f.writelines(f'{bot_id} {event_id}\n' for bot_id in bot_ids)
 
     def has(self, key, value):
         return value in self.data[key]

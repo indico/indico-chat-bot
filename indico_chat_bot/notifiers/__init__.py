@@ -1,4 +1,4 @@
-from . import debug, gitter, mattermost
+from indico_chat_bot.notifiers import debug, gitter, mattermost
 
 ALL_NOTIFIERS = {'mattermost', 'gitter', 'debug'}
 

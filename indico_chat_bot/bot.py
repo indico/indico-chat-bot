@@ -1,24 +1,22 @@
 import atexit
 import hashlib
 import hmac
-import re
 import os
+import re
 import sys
 import time
-import typing as t
 from datetime import datetime, timedelta
+from urllib.parse import urlencode, urljoin
 
 import click
 import requests
 from loguru import logger
 from pytz import utc
-from urllib.parse import urlencode, urljoin
 
-from . import notifiers
-from .util import read_config, dt
-from .storage import Storage
-from .exceptions import InvalidTimeDeltaFormat, InvalidTime, UnknownNotifier
-
+from indico_chat_bot import notifiers
+from indico_chat_bot.exceptions import InvalidTime, InvalidTimeDeltaFormat, UnknownNotifier
+from indico_chat_bot.storage import Storage
+from indico_chat_bot.util import dt, read_config
 
 LOGGER_FORMAT = (
     '<green>{time:YYYY-MM-DD HH:mm:ss.SSS!UTC}</green> | <level>{level: <8}</level> | '
@@ -38,9 +36,9 @@ def _parse_time_delta(time_delta: str) -> timedelta:
     if m:
         mod = -1 if m.group(1) == '-' else 1
 
-        atoms = list(0 if a is None else int(a) * mod for a in m.groups()[1:])
+        atoms = [0 if a is None else int(a) * mod for a in m.groups()[1:]]
         if atoms[1] > 23 or atoms[2] > 59:
-            raise InvalidTime()
+            raise InvalidTime
         return timedelta(days=atoms[0], hours=atoms[1], minutes=atoms[2])
     else:
         raise InvalidTimeDeltaFormat(time_delta)
@@ -72,7 +70,7 @@ def notify(event, bot, channels):
             'start_time': event['startDate']['time'][:5],
             'start_date': event['startDate']['date'],
             'start_tz': event['startDate']['tz'],
-            'room': event['room'] if event['room'] else 'no room',
+            'room': event['room'] or 'no room',
         }
         text = channel['text'].format(**data)
 
@@ -81,13 +79,13 @@ def notify(event, bot, channels):
             raise UnknownNotifier(channel_type)
 
         logger.info(
-            f"Notifying channel '{channel['hook_url']}' about event '{event['title']}' ({event['id']})"
+            f"Notifying channel '{channel['hook_url']}' about event '{event['title']}' ({event['id']})",
         )
         getattr(notifiers, channel_type).notify(bot, channel, text)
 
 
 def fetch_indico_categories(
-    categ_list: t.List[str],
+    categ_list: list[str],
     now: datetime,
     time_delta: timedelta,
     config: dict,
@@ -111,14 +109,14 @@ def fetch_indico_categories(
         if config['secret']:
             params['timestamp'] = str(int(time.time()))
             items = sorted(params.items(), key=lambda x: x[0].lower())
-            param_url = '/{}?{}'.format(url_path, urlencode(items)).encode('utf-8')
+            param_url = f'/{url_path}?{urlencode(items)}'.encode()
             params['signature'] = hmac.new(
-                config['secret'].encode('utf-8'), param_url, hashlib.sha1
+                config['secret'].encode('utf-8'), param_url, hashlib.sha1,
             ).hexdigest()
 
     qstring = urlencode(params)
     url = '{}?{}'.format(urljoin(config['server_url'], url_path), qstring)
-    logger.debug('URL: {}'.format(url))
+    logger.debug(f'URL: {url}')
     req = requests.get(url, verify=(not debug))
     return req.json()['results']
 
@@ -136,7 +134,7 @@ def check_upcoming(
         time_delta = _parse_time_delta(bot['timedelta'])
         results = fetcher(bot['categories'], now, time_delta, config, debug=debug)
 
-        logger.info('{} events found'.format(len(results)))
+        logger.info(f'{len(results)} events found')
 
         for event in results:
             # skip over cancelled/postponed events
@@ -155,7 +153,7 @@ def check_upcoming(
             in_storage = storage.has(evt_id, bot_id)
 
             logger.debug(
-                f' - {evt_id} | delta: {time_delta} | within_delta: {time_delta_satisfied} | storage: {in_storage}'
+                f' - {evt_id} | delta: {time_delta} | within_delta: {time_delta_satisfied} | storage: {in_storage}',
             )
 
             if (time_delta < timedelta() or time_delta_satisfied) and not in_storage:
@@ -213,7 +211,7 @@ def run(config_file, verbose, debug):
             notify(event, bot, channels)
             logger.info('Notified {} about {}'.format(bot['channels'], event['id']))
         logger.info(
-            f'Sleeping till {datetime.utcnow() + timedelta(seconds=polling_time)}...'
+            f'Sleeping till {datetime.utcnow() + timedelta(seconds=polling_time)}...',
         )
         time.sleep(polling_time)
 

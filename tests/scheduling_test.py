@@ -7,7 +7,6 @@ from indico_chat_bot.bot import check_upcoming
 from indico_chat_bot.storage import Storage
 from indico_chat_bot.util import dt
 
-
 ZURICH_TZ = timezone('Europe/Zurich')
 CONFIG = {
     'bots': {
@@ -109,8 +108,8 @@ def dummy_fetcher(categ_list, now, time_delta, config, debug=False) -> list:
     for categ_id in categ_list:
         for event in CATEGORIES[categ_id]:
             event_start_dt = dt(event['startDate'])
-            if (now < event_start_dt and event_start_dt <= (now + time_delta)) or (
-                now > event_start_dt and event_start_dt >= (now + time_delta)
+            if (now < event_start_dt <= (now + time_delta)) or (
+                now > event_start_dt >= (now + time_delta)
             ):
                 res.append(event)
     return res
@@ -118,7 +117,7 @@ def dummy_fetcher(categ_list, now, time_delta, config, debug=False) -> list:
 
 @freeze_time('2022-06-07 06:59')
 def test_no_upcoming():
-    upcoming = list(
+    upcoming = [
         r[0]
         for r in check_upcoming(
             CONFIG,
@@ -126,13 +125,13 @@ def test_no_upcoming():
             False,
             dummy_fetcher,
         )
-    )
+    ]
     assert not {e['id'] for e in upcoming}
 
 
 @freeze_time('2022-06-07 07:00')
 def test_one_upcoming():
-    upcoming = list(
+    upcoming = [
         r[0]
         for r in check_upcoming(
             CONFIG,
@@ -140,13 +139,13 @@ def test_one_upcoming():
             False,
             dummy_fetcher,
         )
-    )
+    ]
     assert {e['id'] for e in upcoming} == {1}
 
 
 @freeze_time('2022-06-07 07:30')
 def test_two_upcoming():
-    upcoming = list(
+    upcoming = [
         r[0]
         for r in check_upcoming(
             CONFIG,
@@ -154,13 +153,13 @@ def test_two_upcoming():
             False,
             dummy_fetcher,
         )
-    )
+    ]
     assert {e['id'] for e in upcoming} == {1, 2}
 
 
 @freeze_time('2022-06-07 15:00')
 def test_one_upcoming_day():
-    upcoming = list(
+    upcoming = [
         r[0]
         for r in check_upcoming(
             CONFIG,
@@ -168,13 +167,13 @@ def test_one_upcoming_day():
             False,
             dummy_fetcher,
         )
-    )
+    ]
     assert {e['id'] for e in upcoming} == {3}
 
 
 @freeze_time('2022-06-07 15:30')
 def test_two_upcoming_day():
-    upcoming = list(
+    upcoming = [
         r[0]
         for r in check_upcoming(
             CONFIG,
@@ -182,5 +181,5 @@ def test_two_upcoming_day():
             False,
             dummy_fetcher,
         )
-    )
+    ]
     assert {e['id'] for e in upcoming} == {3, 4}
