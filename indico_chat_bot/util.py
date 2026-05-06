@@ -37,8 +37,7 @@ def read_config(config_file: str):
     return {
         'storage_path': config.get('storage', 'path', fallback='./storage.txt'),
         'server_url': config['indico']['server_url'],
-        'api_key': config.get('indico', 'api_key', fallback=None),
-        'secret': config.get('indico', 'secret', fallback=None),
+        'api_token': config.get('indico', 'api_token', fallback=None),
         'bots': bots,
         'channels': channels,
         'polling_time': int(config.get('bot', 'polling_time', fallback='300')),

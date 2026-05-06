@@ -6,8 +6,7 @@ path = file://./storage.txt
 
 [indico]
 server_url = https://indico.example.com
-api_key = xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-secret = xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+api_token = indp_.....
 
 [channel_test]
 type = mattermost
