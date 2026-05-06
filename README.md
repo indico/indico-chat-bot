@@ -1,20 +1,11 @@
-<table>
-<tr>
-<td><img src="logo.svg"></td>
-<td>
-<h2>Indico Chatbot</h2>
-A chat bot for Indico.
-<h3>Currently supported:</h3>
-<ul>
-<li>Mattermost</li>
-<li>Gitter</li>
-</ul>
-</td>
-</tr>
-</table>
+# Indico chat bot
 
-## Installing
+Posts indico events to Mattermost channels. Yep, not really a chat bot, more an Indico bot
+that posts events to chat rooms.
 
-```sh
-$ docker-compose up
-```
+## Installation
+
+- `uv sync --locked --extra redis` (when using redis as the storage backend)
+- `uv sync --locked` (otherwise)
+
+There's also a docker-compose file, so you can use `docker-compose up` to run in Docker.

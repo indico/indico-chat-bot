@@ -1,0 +1,34 @@
+[project]
+name = 'indico-chat-bot'
+description = 'A bot that posts Indico event announcements to chat rooms'
+readme = 'README.md'
+version = '0.2'
+requires-python = '>=3.14'
+dependencies = [
+    'certifi>=2026.4.22',
+    'click>=8.3.3',
+    'loguru>=0.7.3',
+    'pytz>=2026.2',
+    'requests>=2.33.1',
+]
+
+[project.scripts]
+indico-chat-bot = 'indico_chat_bot.bot:cli'
+
+[project.optional-dependencies]
+dev = [
+    'freezegun>=1.5.5',
+    'pytest>=9.0.3',
+    'pytest-cov>=7.1.0',
+    'ruff>=0.15.12',
+]
+redis = [
+    'redis>=7.4.0',
+]
+
+[build-system]
+requires = ['hatchling==1.29.0']
+build-backend = 'hatchling.build'
+
+[tool.uv.pip]
+exclude-newer = '1 week'

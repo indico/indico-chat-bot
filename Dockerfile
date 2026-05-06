@@ -1,12 +1,11 @@
-FROM python:3.13-alpine
+FROM python:3.14-alpine
 
-ENV DEBUG=
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 RUN mkdir /bot/
-RUN python -m venv /bot/.venv
-COPY . /bot/src
-RUN cd /bot/src && \
-    /bot/.venv/bin/pip install .[redis]
+COPY . /bot/
+RUN cd /bot/ && uv sync --locked --extra redis
+
 
 VOLUME ["/bot/config"]
-ENTRYPOINT [ "/bot/.venv/bin/indico_chat_bot", "run", "/bot/config/bot.conf" ]
+CMD ["/bot/.venv/bin/indico-chat-bot", "run", "/bot/config/bot.conf"]
