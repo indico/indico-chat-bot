@@ -3,9 +3,9 @@ from collections import defaultdict
 from freezegun import freeze_time
 from pytz import timezone
 
-from ..bot import check_upcoming
-from ..storage import Storage
-from ..util import dt
+from indico_chat_bot.bot import check_upcoming
+from indico_chat_bot.storage import Storage
+from indico_chat_bot.util import dt
 
 
 ZURICH_TZ = timezone("Europe/Zurich")
