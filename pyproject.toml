@@ -30,5 +30,5 @@ redis = [
 requires = ['hatchling==1.29.0']
 build-backend = 'hatchling.build'
 
-[tool.uv.pip]
+[tool.uv]
 exclude-newer = '1 week'
