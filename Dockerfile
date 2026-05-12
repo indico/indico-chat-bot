@@ -4,7 +4,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 RUN mkdir /bot/
 COPY . /bot/
-RUN cd /bot/ && uv sync --locked --extra redis
+RUN cd /bot/ && uv sync --frozen --extra redis
 
 
 VOLUME ["/bot/config"]

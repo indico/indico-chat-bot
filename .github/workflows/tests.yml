@@ -22,7 +22,7 @@ jobs:
       - uses: astral-sh/setup-uv@v7
 
       - name: Install package
-        run: uv sync --locked --extra dev
+        run: uv sync --frozen --extra dev
 
       - name: Check for linter errors
         run: uv run ruff check --output-format github .
@@ -42,7 +42,7 @@ jobs:
       - uses: astral-sh/setup-uv@v7
 
       - name: Install package
-        run: uv sync --locked --extra dev
+        run: uv sync --frozen --extra dev
 
       - name: Run tests
         run: uv run pytest

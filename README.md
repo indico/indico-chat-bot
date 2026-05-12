@@ -5,7 +5,7 @@ that posts events to chat rooms.
 
 ## Installation
 
-- `uv sync --locked --extra redis` (when using redis as the storage backend)
-- `uv sync --locked` (otherwise)
+- `uv sync --frozen --extra redis` (when using redis as the storage backend)
+- `uv sync --frozen` (otherwise)
 
 There's also a docker-compose file, so you can use `docker-compose up` to run in Docker.
